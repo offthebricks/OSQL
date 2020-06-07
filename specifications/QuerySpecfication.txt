@@ -1,0 +1,74 @@
+Query: {
+	type: 2,					//default to select
+	result_limit: null,			//default to no limit (NULL)
+	distinct: false,			//default to non distinct
+	
+	table: "",					//query table, or raw SQL
+	fields: [],					//can be a string or 'Field' object; string values are not permitted whitespaces
+	joins: [],
+	clauses: [],
+	values: [],
+	orderby: [],
+}
+
+
+QueryTypes: {
+	RawSQL: 1,
+	Select: 2,
+	Update: 3,
+	Insert: 4,
+	Delete: 5
+}
+
+JoinTypes: {
+	Left: 1,
+	Inner: 2,
+	Right: 3,
+	Outer: 4
+}
+
+ClauseTypes: {
+	And: 1,
+	Or: 2
+}
+
+OperatorTypes: {
+	Equals: 1,
+	NotEquals: 2,
+	GreaterThan: 3,
+	GreaterThanEquals: 4
+}
+
+
+Field: {
+	column: "",
+	as: null,				//select 'as' value if desired
+	join: null				//for clause compare values
+}
+
+Join: {
+	table: "",
+	type: 1,				//default to left join
+	clauses: [],
+	fields: [],				//fields to fetch from this join
+	id: null
+}
+
+Clause: {
+	column: "",
+	compare: "",			//may be int, float, string, or 'Field' _object
+	type: 1,				//defaults to 'And'
+	operator: 1,			//defaults to 'Equals'
+	join: null
+}
+
+Value: {
+	column: null,
+	value: null
+}
+
+OrderBy: {
+	column: "",
+	desc: false,
+	join: null
+}
