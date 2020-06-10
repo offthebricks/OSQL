@@ -28,28 +28,19 @@ class Parser{
 		return $str;
 	}
 	
-	private function escapeStr($str){
-		if(class_exists("\\osql\\Database") && method_exists("\\osql\\Database","escapeStr")){
-			$escapeFunction = "\osql\Database::escapeStr";
-			return $escapeFunction($str);
-		}
-		return $str;
-	}
-	
 	private function buildRawSQL(&$obj){
 		//in a raw sql query, the query table value contains the full sql
 		return $obj->table;
 	}
 	
 	private function buildDelete(&$obj){
-		//DELETE FROM table WHERE
 		$str = "";
 		//build where clause
 		if($obj->clauses){
-			$str .= " WHERE ".$this->getSelectClauses($obj->clauses,"A",[]);
+			$str .= " WHERE ".$this->getSelectClauses($obj->clauses,NULL,[]);
 		}
 		//finish
-		return "DELETE A FROM ".$obj->table." AS A".$str;
+		return "DELETE FROM ".$obj->table.$str;
 	}
 	
 	private function buildInsert(&$obj){
@@ -71,7 +62,6 @@ class Parser{
 				$part2 .= $vobj->value;
 			}
 			else{
-				//$part2 .= "'".$this->escapeStr($vobj->value)."'";
 				$part2 .= ":p".sizeof($this->parameters);
 				$this->parameters[] = $vobj->value;
 			}
@@ -97,17 +87,16 @@ class Parser{
 				$str .= "`".$vobj->column."`=".$vobj->value;
 			}
 			else{
-				//$str .= "`".$vobj->column."`='".$this->escapeStr($vobj->value)."'";
 				$str .= "`".$vobj->column."`=:p".sizeof($this->parameters);
 				$this->parameters[] = $vobj->value;
 			}
 		}
 		//build where clause
 		if($obj->clauses){
-			$str .= " WHERE ".$this->getSelectClauses($obj->clauses,"A",[]);
+			$str .= " WHERE ".$this->getSelectClauses($obj->clauses,NULL,[]);
 		}
 		//finish
-		return "UPDATE ".$obj->table." AS A SET ".$str;
+		return "UPDATE ".$obj->table." SET ".$str;
 	}
 	
 	private function buildSelect(&$obj){
@@ -125,7 +114,7 @@ class Parser{
 			}
 			$fieldsql .= $this->getSelectFields($join->fields,1 + $idx);
 		}
-		$str .= " $fieldsql FROM ".$obj->table." AS A";
+		$str .= " $fieldsql FROM ".$obj->table." A";
 		$str .= $this->getSelectJoins($obj->joins);
 		if($obj->clauses){
 			$str .= " WHERE ".$this->getSelectClauses($obj->clauses,"A",$obj->joins);
@@ -213,7 +202,10 @@ class Parser{
 			}
 			else{
 				$this->checkColumnIsSafe($clause->column);
-				$str .= "$prefix.".$clause->column.OperatorTypes::GetString($clause->operator);
+				if($prefix){
+					$str .= "$prefix.";
+				}
+				$str .= $clause->column.OperatorTypes::GetString($clause->operator);
 				if(is_numeric($clause->compare)){
 					$str .= $clause->compare;
 				}
@@ -241,7 +233,7 @@ class Parser{
 	private function getSelectJoins($list){
 		$str = "";
 		foreach($list as $idx => $join){
-			$str .= JoinTypes::GetString($join->type)."JOIN ".$join->table." AS ".chr($idx + 1 + 65)." ON ";
+			$str .= JoinTypes::GetString($join->type)."JOIN ".$join->table." ".chr($idx + 1 + 65)." ON ";
 			$str .= $this->getSelectClauses($join->clauses,chr($idx + 1 + 65),$list);
 		}
 		return $str;
