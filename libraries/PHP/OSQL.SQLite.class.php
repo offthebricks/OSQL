@@ -10,7 +10,7 @@ class DatabaseConfig{
 
 class Database{
 	private $dbconfig;
-	private $autoSanitize = TRUE;
+	private $autoSanitize = FALSE;
 	private $busyTimeout = 30000;		//SQLite busy timeout of 30 seconds
 	
 	private $intransaction = FALSE;
