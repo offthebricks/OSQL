@@ -11,7 +11,7 @@ class DatabaseConfig{
 
 class Database{
 	private $dbconfig;
-	private $autoSanitize = TRUE;
+	private $autoSanitize = FALSE;
 	
 	private $intransaction = FALSE;
 	private $insofttransaction = FALSE;
