@@ -205,7 +205,18 @@ class Parser{
 				if($prefix){
 					$str .= "$prefix.";
 				}
-				$str .= $clause->column.OperatorTypes::GetString($clause->operator);
+				//need to handle nulls differently
+				if($clause->compare === NULL){
+					//check for an invalid compare case
+					if($clause->operator != OperatorTypes::$Equals){
+						throw new \Exception("null clause compare with non-equals operator");
+					}
+					$str .= $clause->column." IS NULL";
+					continue;
+				}
+				else{
+					$str .= $clause->column.OperatorTypes::GetString($clause->operator);
+				}
 				if(is_numeric($clause->compare)){
 					$str .= $clause->compare;
 				}
