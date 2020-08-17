@@ -1,5 +1,5 @@
 <?php
-namespace osql;
+namespace osql\mysql;
 
 class DatabaseConfig{
 	public $dbname;
@@ -112,23 +112,23 @@ class Database{
 				//if the change was an update
 				if(isset($arr['update'])){
 					//restore values to those before the update
-					$query = new Query($arr['table'],QueryTypes::$Update);
+					$query = new Query($arr['table'],\osql\QueryTypes::$Update);
 					$query->addValues($arr['update']);
-					$query->addClause("id",$arr['id'],NULL,OperatorTypes::$Equals);
+					$query->addClause("id",$arr['id'],NULL,\osql\OperatorTypes::$Equals);
 					$this->OQuery($query);
 				}
 				//if the change was a delete
 				else if(isset($arr['delete'])){
 					//restore deleted values
-					$query = new Query($arr['table'],QueryTypes::$Insert);
+					$query = new Query($arr['table'],\osql\QueryTypes::$Insert);
 					$query->addValues($arr['delete']);
 					$this->OQuery($query);
 				}
 				//the change was an insert
 				else{
 					//delete inserted row
-					$query = new Query($arr['table'],QueryTypes::$Delete);
-					$query->addClause("id",$arr['id'],NULL,OperatorTypes::$Equals);
+					$query = new Query($arr['table'],\osql\QueryTypes::$Delete);
+					$query->addClause("id",$arr['id'],NULL,\osql\OperatorTypes::$Equals);
 					$this->OQuery($query);
 				}
 			}
@@ -152,22 +152,22 @@ class Database{
 			throw new \Exception("OQuery: missing osql Parser and/or QueryTypes classes");
 		}
 		
-		$parser = new Parser($this->autoSanitize);
+		$parser = new \osql\Parser($this->autoSanitize);
 		$sql = $parser->GetSQL($obj,$parameters);
 		
 		switch($obj->type){
-			case QueryTypes::$RawSQL:
+			case \osql\QueryTypes::$RawSQL:
 				$this->Query($sql,$parameters);
 				break;
-			case QueryTypes::$Select:
+			case \osql\QueryTypes::$Select:
 				$limit = $obj->result_limit;
 				return $this->Select($sql,$parameters,$limit);
-			case QueryTypes::$Update:
+			case \osql\QueryTypes::$Update:
 				$this->Update($sql,$obj,$parameters);
 				break;
-			case QueryTypes::$Insert:
+			case \osql\QueryTypes::$Insert:
 				return $this->Insert($sql,$obj->table,$parameters);
-			case QueryTypes::$Delete:
+			case \osql\QueryTypes::$Delete:
 				$this->Delete($sql,$obj,$parameters);
 				break;
 			default:
@@ -288,7 +288,7 @@ class Database{
 		if(!class_exists('\osql\Query')){
 			throw new \Exception("Update: osql query class required for soft transaction update queries");
 		}
-		$query = new Query($obj->table,QueryTypes::$Select);
+		$query = new Query($obj->table,\osql\QueryTypes::$Select);
 		$query->addField("*");
 		foreach($obj->clauses as $cObj){
 			$query->clauses[] = $cObj;
@@ -310,7 +310,7 @@ class Database{
 			throw new \Exception("Update: osql query class required for soft transaction update queries");
 		}
 		//build a select query from the update object
-		$query = new Query($obj->table,QueryTypes::$Select);
+		$query = new Query($obj->table,\osql\QueryTypes::$Select);
 		$query->addField("id");
 		foreach($obj->values as $vObj){
 			if($vObj->column == "id"){
