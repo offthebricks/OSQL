@@ -114,6 +114,9 @@ class Parser{
 			}
 			$fieldsql .= $this->getSelectFields($join->fields,1 + $idx);
 		}
+		if(!$fieldsql){
+			throw new \Exception("no select fields provided");
+		}
 		$str .= " $fieldsql FROM ".$obj->table." A";
 		$str .= $this->getSelectJoins($obj->joins);
 		if($obj->clauses){
@@ -179,9 +182,6 @@ class Parser{
 			if($field->as){
 				$str .= " AS ".$field->as;
 			}
-		}
-		if(!$str){
-			throw new \Exception("no select fields provided");
 		}
 		return $str;
 	}
