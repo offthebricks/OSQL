@@ -171,7 +171,7 @@ class Database{
 				$this->Delete($sql,$obj,$parameters);
 				break;
 			default:
-				throw new \Exception("OQuery: unknown query type");
+				throw new \Exception("OQuery: unknown query type: ".$obj->type);
 				break;
 		}
 		
@@ -189,8 +189,7 @@ class Database{
 		$stmt = $this->mysqli->prepare($sql);
 		if(!$stmt){
 			//extract query type
-			$qt = substr($sql,0,strpos($sql," "));
-			throw new \Exception($qt." : prepare query fail: ".$sql." : ".$this->mysqli->error);
+			throw new \Exception("OQuery: prepare query fail: ".$sql." : ".$this->mysqli->error);
 		}
 		
 		if($prepValues){
@@ -201,7 +200,7 @@ class Database{
 		
 		$res = $stmt->execute();
 		if(!$res){
-			throw new \Exception("Select: failed to execute statement");
+			throw new \Exception("OQuery: failed to execute statement: $sql : ".$this->mysqli->error);
 		}
 		
 		if(!$getResults){
@@ -212,7 +211,7 @@ class Database{
 		$resObj = $stmt->get_result();
 		$stmt->close();
 		if(!$resObj){
-			throw new \Exception("Select: failed to fetch results");
+			throw new \Exception("Failed to fetch results: $sql : ".$this->mysqli->error);
 		}
 		$resVal = [];
 		while($row = $resObj->fetch_array(MYSQLI_ASSOC)){
