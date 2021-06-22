@@ -177,7 +177,11 @@ class Database{
 	############################################################
 	
 	private function Query($sql,$prepared,$getResults=FALSE){
-		$stmt = $this->linkObj->prepare($sql);
+		$stmt = @$this->linkObj->prepare($sql);
+		if(!$stmt){
+			throw new \Exception("OQuery: prepare query fail: ".$sql." : (".$this->linkObj->lastErrorMsg().")".$this->linkObj->lastErrorCode());
+			return;
+		}
 		
 		if($prepared){
 			foreach($prepared as $key => $value){
@@ -186,6 +190,10 @@ class Database{
 		}
 		
 		$resObj = $stmt->execute();
+		if(!$resObj){
+			throw new \Exception("OQuery: failed to execute statement: $sql : (".$this->linkObj->lastErrorCode().")".$this->linkObj->lastErrorMsg());
+		}
+		$resObj->finalize();
 		
 		if(!$getResults){
 			return;
@@ -203,7 +211,7 @@ class Database{
 		$resVal = $this->Query($sql,$prepared,TRUE);
 		
 		//if only one result was requested
-		if($limit == 1){
+		if($resVal && $limit == 1){
 			$resVal = $resVal[0];
 			//if only one column was requested
 			if(sizeof($resVal) == 1){
