@@ -4,14 +4,14 @@ namespace osql\sqlite;
 class DatabaseConfig{
 	public $path;				//must end in a slash '/'
 	public $fileext = "db";		//database file extension
-	public $name;
+	public $dbname;
 	public $prefix;
 }
 
 class Database{
 	private $dbconfig;
 	private $autoSanitize = FALSE;
-	private $busyTimeout = 30000;		//SQLite busy timeout of 30 seconds
+	private $busyTimeout = 5000;		//SQLite busy timeout of 5 seconds
 	
 	private $intransaction = FALSE;
 	private $insofttransaction = FALSE;
@@ -28,12 +28,11 @@ class Database{
 	public function Connect($databaseName=NULL){
 		$this->Close();
 		
-		$db = $this->dbconfig->name;
+		$db = $this->dbconfig->dbname;
 		if($databaseName !== NULL){
 			$db = $databaseName;
 		}
-		$db = $this->dbconfig->path.$databaseName.".".$this->dbconfig->fileext;
-		
+		$db = $this->dbconfig->path.$db.".".$this->dbconfig->fileext;
 		$this->linkObj = new \SQLite3($db);
 		$this->linkObj->busyTimeout($this->busyTimeout);
 	}
@@ -60,7 +59,7 @@ class Database{
 	
 	############################################################
 	
-	public function BeginTransaction($soft=TRUE){
+	public function BeginTransaction($soft=FALSE){
 		if($this->intransaction || $this->insofttransaction){
 			return;
 		}
@@ -138,9 +137,6 @@ class Database{
 	}
 	
 	public function OQuery($obj){
-		if(!$this->linkObj){
-			throw new \Exception("OQuery: not connected to a database");
-		}
 		if(!is_object($obj)){
 			throw new \Exception("OQuery: passed value is not an object");
 		}
@@ -177,6 +173,9 @@ class Database{
 	############################################################
 	
 	private function Query($sql,$prepared,$getResults=FALSE){
+		if(!$this->linkObj){
+			throw new \Exception("OQuery: not connected to a database");
+		}
 		$stmt = @$this->linkObj->prepare($sql);
 		if(!$stmt){
 			throw new \Exception("OQuery: prepare query fail: ".$sql." : (".$this->linkObj->lastErrorMsg().")".$this->linkObj->lastErrorCode());
