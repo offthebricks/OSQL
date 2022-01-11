@@ -41,6 +41,10 @@ class Database{
 			}
 		}
 		if($databaseName === NULL){
+			//if just connecting to the engine, and not a database
+			if(!$this->dbconfig->dbname){
+				return;
+			}
 			$databaseName = $this->dbconfig->dbprefix.$this->dbconfig->dbname;
 		}
 		$res = $this->mysqli->select_db($databaseName);
@@ -64,7 +68,7 @@ class Database{
 	
 	############################################################
 	
-	public function BeginTransaction($soft=TRUE){
+	public function BeginTransaction($soft=FALSE){
 		if($this->intransaction || $this->insofttransaction){
 			return;
 		}
@@ -74,7 +78,7 @@ class Database{
 			$this->insofttransaction = TRUE;
 		}
 		else{
-			$res = $this->Query("START TRANSACTION;");
+			$res = $this->mysqli->query("START TRANSACTION;");
 			if(!$res){
 				throw new \Exception("Transaction: failed to start");
 			}
@@ -84,7 +88,7 @@ class Database{
 	
 	public function CommitTransaction(){
 		if($this->intransaction){
-			$res = $this->Query("COMMIT;");
+			$res = $this->mysqli->query("COMMIT;");
 			if(!$res){
 				return FALSE;
 			}
@@ -99,7 +103,7 @@ class Database{
 	
 	public function RollbackTransaction(){
 		if($this->intransaction){
-			$res = $this->Query("ROLLBACK;");
+			$res = $this->mysqli->query("ROLLBACK;");
 			if(!$res){
 				return FALSE;
 			}
@@ -157,7 +161,12 @@ class Database{
 		
 		switch($obj->type){
 			case \osql\QueryTypes::$RawSQL:
-				$this->Query($sql,$parameters);
+				if($obj->result_limit !== NULL){
+					return $this->Query($sql,$parameters,TRUE);
+				}
+				else{
+					$this->Query($sql,$parameters);
+				}
 				break;
 			case \osql\QueryTypes::$Select:
 				$limit = $obj->result_limit;
@@ -180,7 +189,7 @@ class Database{
 	
 	############################################################
 	
-	private function Query($sql,$prepared,$getResults=FALSE){
+	private function Query($sql,$prepared=NULL,$getResults=FALSE){
 		$prepValues = NULL;
 		if($prepared){
 			$prepValues = $this->bindStatementValues($sql,$prepared);
@@ -226,7 +235,7 @@ class Database{
 		$resVal = $this->Query($sql,$prepared,TRUE);
 		
 		//if only one result was requested
-		if($limit == 1){
+		if($resVal && $limit == 1){
 			$resVal = $resVal[0];
 			//if only one column was requested
 			if(sizeof($resVal) == 1){
