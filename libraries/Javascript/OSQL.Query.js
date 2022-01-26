@@ -166,7 +166,9 @@ var OSQL = {
 		Equals: 1,
 		NotEquals: 2,
 		GreaterThan: 3,
-		GreaterThanEquals: 4
+		GreaterThanEquals: 4,
+		LessThan: 5,
+		LessThanEquals: 6
 	},
 	
 	Field: function(column,as,join){
