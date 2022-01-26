@@ -48,6 +48,8 @@ class OperatorTypes{
 	public static $NotEquals = 2;
 	public static $GreaterThan = 3;
 	public static $GreaterThanEquals = 4;
+	public static $LessThan = 5;
+	public static $LessThanEquals = 6;
 	
 	public static function GetString($type){
 		switch($type){
