@@ -13,7 +13,9 @@ class Parser{
 		if(!class_exists('\osql\QueryTypes')){
 			throw new \Exception("GetSQL: missing QueryTypes class");
 		}
+		
 		$this->parameters = &$parameters;
+		$this->parameters = [];
 		
 		$str = "";
 		switch($obj->type){
@@ -58,7 +60,7 @@ class Parser{
 			if(!$vobj->value && ($vobj->value === NULL || strlen($vobj->value) == 0)){
 				$part2 .= "NULL";
 			}
-			else if(is_numeric($vobj->value)){
+			else if($this->isNumeric($vobj->value)){
 				$part2 .= $vobj->value;
 			}
 			else{
@@ -83,7 +85,7 @@ class Parser{
 			if($vobj->value === NULL){
 				$str .= "`".$vobj->column."`=NULL";
 			}
-			else if(is_numeric($vobj->value)){
+			else if($this->isNumeric($vobj->value)){
 				$str .= "`".$vobj->column."`=".$vobj->value;
 			}
 			else{
@@ -217,7 +219,7 @@ class Parser{
 				else{
 					$str .= $clause->column.OperatorTypes::GetString($clause->operator);
 				}
-				if(is_numeric($clause->compare)){
+				if($this->isNumeric($clause->compare)){
 					$str .= $clause->compare;
 				}
 				else if(is_string($clause->compare)){
@@ -251,6 +253,15 @@ class Parser{
 	}
 	
 	############################################################
+	
+	private function isNumeric($value){
+		//zero length strings need to return as true in LOEN
+		//on linux a variable of type int will always return false, so make it a string first
+		if(!strlen($value) || ctype_alnum("".$value)){
+			return FALSE;
+		}
+		return TRUE;
+	}
 	
 	private function checkColumnIsSafe($columnName){
 		//check for space in column name
