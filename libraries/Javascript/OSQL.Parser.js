@@ -27,7 +27,7 @@ var OSQL_Parser = new function(){
 				part2 += ",";
 			}
 			part1 += "\"" + vobj.column + "\"";
-			if(vobj.value === null || !vobj.value){
+			if(vobj.value === null){
 				part2 += "NULL";
 			}
 			else if(isNumeric(vobj.value)){
@@ -239,21 +239,8 @@ var OSQL_Parser = new function(){
 		}
 	}
 	
-	function isNumeric(str){
-		if(!isNaN(str)){
-			return true;
-		}
-		let i, code;		//zero length strings return as true
-		if(typeof(str) !== 'string' || !str.length){
-			return false;
-		}
-		for(i=0; i<str.length; i++){
-			code = str.charCodeAt(i);
-			if (!(code > 47 && code < 58)){// numeric (0-9)
-				return false;
-			}
-		}
-		return true;
+	function isNumeric(value){
+		return !isNaN(parseFloat(value)) && isFinite(value);
 	}
 	
 	/************************************/
