@@ -50,6 +50,7 @@ class OperatorTypes{
 	public static $GreaterThanEquals = 4;
 	public static $LessThan = 5;
 	public static $LessThanEquals = 6;
+	public static $Like = 7;
 	
 	public static function GetString($type){
 		switch($type){
@@ -60,6 +61,7 @@ class OperatorTypes{
 			case self::$GreaterThanEquals:return ">=";
 			case self::$LessThan:return "<";
 			case self::$LessThanEquals:return "<=";
+			case self::$Like:return " like ";
 		}
 		return "";
 	}
